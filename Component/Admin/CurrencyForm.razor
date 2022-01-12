@@ -1,0 +1,52 @@
+﻿
+
+<button class="btn btn-primary my-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">Create Currency</button>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+  <div class="offcanvas-header">
+    <h5 id="offcanvasRightLabel">Offcanvas right</h5>
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    
+
+    <EditForm Model="@Currency" OnValidSubmit="@HandleValidSubmit" class="mt-3">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+    
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" id="floatingCurrencyCode" @bind="@Currency.CurrencyCode">
+          <label for="floatingCurrencyCode">Code</label>
+        </div>
+    
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" id="floatingName" @bind="@Currency.Name">
+          <label for="floatingName">Name</label>
+        </div>
+    
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" id="floatingLogo" @bind="@Currency.LogoUrl">
+          <label for="floatingLogo">Logo</label>
+        </div>
+    
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" id="floatingColor" @bind="@Currency.Color">
+          <label for="floatingColor">Color</label>
+        </div>
+    
+        <div class="text-end mt-3">
+            <button class="btn btn-primary" type="submit" data-bs-dismiss="offcanvas">Create</button>
+        </div>
+        
+    </EditForm>
+
+
+  </div>
+</div>
+
+
+
+@code {
+    [Parameter] public Currency Currency { get; set; }
+    [Parameter] public EventCallback HandleValidSubmit { get; set; }
+}

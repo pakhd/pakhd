@@ -1,0 +1,59 @@
+﻿
+
+<h3>@Title</h3>
+
+@typeparam TItem
+
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <caption class="my-4">List of @Caption</caption>
+        <thead>
+            <tr>@TableHeader</tr>
+        </thead>
+        <tbody >
+            @if(Items is null)
+            {
+                <p>Loading...</p>
+            }
+            else if(Items.Count() == 0)
+            {
+                <p>No Data</p>
+            }
+            else
+            {
+                foreach (var item in Items)
+                {
+                    <tr>@RowTemplate(item)</tr>
+                } 
+            }
+            
+        </tbody>
+        <tfoot>
+            @if(Items is not null && TableFooter is not null)
+            {
+                <tr>@TableFooter</tr>
+            }
+            
+        </tfoot>
+    </table>
+</div>
+
+@code {
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public RenderFragment TableHeader { get; set; }
+
+    [Parameter]
+    public RenderFragment TableFooter { get; set; }
+
+    [Parameter]
+    public RenderFragment<TItem> RowTemplate { get; set; }
+
+    [Parameter]
+    public IReadOnlyList<TItem> Items { get; set; }
+
+    [Parameter]
+    public string Caption { get; set; }
+}

@@ -1,0 +1,81 @@
+﻿@page "/sales/orders"
+@inject SalesOrderService _salesOrder
+@inject SalesLineService _salesLine
+@attribute [Authorize]
+
+<SalesLineForm SalesLines="@SalesLines" SalesOrderNo="@SalesOrderNo" IsPosted="@IsPosted" OnPostClick="@(() => PostSalesOrder(SalesOrder))"/>
+
+
+<Table Items="SalesOrders" Caption="sales orders">
+    <TableHeader>
+        <th>Created On</th>
+        <th>Posted On</th>
+        <th>Order No</th>
+        <th>Customer</th>
+        <th>Status</th>
+        <th>Tickets</th>
+        <th>Amount</th>
+        <th></th>
+    </TableHeader>
+    <RowTemplate>
+        <td>@context.CreatedOn</td>
+        <td>@context.PostingDate</td>
+        <td>@context.OrderNo</td>
+        <td>@context.PakhdUser.UserName</td>
+        <td>@context.Status</td>
+        <td>@context.SalesLines.Count()</td>
+        <td>@context.SalesLines.Sum(s => s.Price)</td>
+        <td>
+            <button class="btn btn-sm btn-outline-primary" 
+                    data-bs-toggle="offcanvas" 
+                    data-bs-target="#offcanvasSalesLines" 
+                    aria-controls="offcanvasSalesLines" 
+                    @onclick="@(() => GetSalesLines(context))">Lines</button>
+        </td>
+    </RowTemplate>
+    <TableFooter>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>@SalesOrders.Sum(s => s.SalesLines.Count())</td>
+        <td>@SalesOrders.Sum(s => s.SalesLines.Sum(s => s.Price))</td>
+    </TableFooter>
+</Table>
+
+@code {
+    public SalesOrder[] SalesOrders { get; set; }
+    public SalesLine[] SalesLines { get; set; }
+    public SalesOrder SalesOrder { get; set; }
+    public string SalesOrderNo { get; set; }
+    public bool IsPosted { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        SalesOrders = await _salesOrder.GetAsync();
+    }
+
+    private async void GetSalesLines(SalesOrder salesOrder)
+    {
+        SalesLines = await _salesLine.GetByOrderAsync(salesOrder.SalesOrderId);
+        SalesOrder = salesOrder;
+        if(salesOrder.Status == SalesOrderStatus.Posted)
+        {
+            IsPosted = true;
+        }
+        else
+        {
+            IsPosted = false;
+        }
+        SalesOrderNo = salesOrder.OrderNo;
+        StateHasChanged();
+    }
+
+    private async void PostSalesOrder(SalesOrder salesOrder)
+    {
+        SalesOrders = await _salesOrder.PostAsync(salesOrder);
+
+    }
+}

@@ -1,0 +1,41 @@
+﻿@page "/users"
+@inject UserService _user
+@attribute [Authorize]
+
+
+
+<Table Items="PakhdUsers" Caption="users">
+    <TableHeader>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Reservations</th>
+        <th>Bought</th>
+    </TableHeader>
+    <RowTemplate>
+        <td>@context.UserName</td>
+        <td>@context.Email</td>
+        <td>@context.PhoneNumber</td>
+        <td>@context.Reservations.Where(r => r.Status == ReservationStatus.Active).Count()</td>
+        <td>@context.Reservations.Where(r => r.Status == ReservationStatus.Sold).Count()</td>
+        <td></td>
+    </RowTemplate>
+    <TableFooter>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>@PakhdUsers.Sum(p => p.Reservations.Where(r => r.Status == ReservationStatus.Active).Count())</td>
+        <td>@PakhdUsers.Sum(p => p.Reservations.Where(r => r.Status == ReservationStatus.Sold).Count())</td>
+    </TableFooter>
+</Table>
+
+
+@code {
+    public PakhdUser[] PakhdUsers { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        PakhdUsers = await _user.GetAsync();
+
+    }
+}

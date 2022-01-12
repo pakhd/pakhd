@@ -1,0 +1,71 @@
+﻿<div class="px-4 py-2 mt-4 text-center">
+  <img class="d-block mx-auto mb-4" src="@Lottery.Currency.LogoUrl" alt="" width="72" height="57">
+  <h1 class="display-5 fw-bold">@Lottery.Name</h1>
+  <div class="col-lg-6 mx-auto">
+    <p class="lead mb-4">@Lottery.Description</p>
+
+    <div class="me-1">
+    	<button class="btn btn-lg btn-outline-dark" data-bs-toggle="modal"  data-bs-target="#prizeModal"><i class="bi bi-info-circle"></i> Info</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="modal modal-sheet position-static d-block py-2" tabindex="-1" role="dialog" id="modalSheet">
+    <div class="modal fade" id="prizeModal" tabindex="-1" aria-labelledby="prizeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content rounded-6 shadow border-0">
+              <div class="modal-header border-bottom-1">
+                <h5 class="modal-title">About Lottery</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"x></button>
+              </div>
+              <div class="modal-body mt-2 py-0">
+                  <div class="mb-5">
+                      <h5 class="modal-title fw-bold">🔊 Announcement</h5>
+                      <p class="mb-1">The winners will be annouced at</p>
+                      <p class="font-monospace fw-bolder fs-5 text-danger">TBA</p>
+                      
+                  </div>
+                  <div class="mb-5">
+                      <h5 class="modal-title fw-bold">🎆 Prize Pool</h5>
+                    <p class="my-1"><strong>1st</strong>: @Convert.ToInt32(Lottery.Prize) @Lottery.Currency.CurrencyCode</p>
+                  </div>
+                  
+                  <div class="mb-5">
+                      <h5 class="modal-title fw-bold">📞 Contact Us</h5>
+                    <a class="w-100 py-2 my-1 btn btn-outline-success rounded-4" href='@($"https://wa.me/96103735215?text=I reserved the ticket. And then?")'>
+                        <i class="bi bi-whatsapp"></i>
+                        Contact us on Whatsapp
+                    </a>
+                    <a class="w-100 py-2 my-1 btn btn-outline-dark rounded-4" href="mailto:pakhdapp@gmail.com">
+                        <i class="bi bi-envelope"></i>
+                        pakhdapp@gmail.com
+                    </a>
+                  </div>
+
+                  <div class="mb-3">
+                      <h5 class="modal-title fw-bold mb-1">🚶🏻‍♂️ Steps</h5>
+                      <ul class="list-group">
+                          <li class="list-group-item">1 - Login</li>
+                          <li class="list-group-item">2 - Reserve a ticket</li>
+                          <li class="list-group-item">3 - Contact Us</li>
+                          <li class="list-group-item">4 - Buy the ticket</li>
+                        </ul>
+                  </div>
+                  <div class="modal-footer flex-column border-top-0">
+                    <button type="button" class="btn btn-lg btn-light w-100 mx-0" data-bs-dismiss="modal">Close</button>
+                </div>
+                  
+               </div>
+              
+            </div>
+        </div>   
+    </div>
+</div>
+
+
+@code {
+    [Parameter] public Lottery Lottery { get; set; }
+}

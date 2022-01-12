@@ -1,0 +1,22 @@
+﻿
+
+<div class="card my-3 shadow shadow-sm" style="max-width: 540px;">
+  <div class="row g-0">
+    <div class="col-md-4 p-5 border-end text-center bg-success bg-opacity-1">
+      <h1 class="display-1 text-dark opacity-100">@Count</h1>
+    </div>
+    <div class="col-md-8">
+      <div class="card-body">
+        <h5 class="card-title">Tickets</h5>
+        <p class="card-text">You are now eligible to redeem @Count tickets</p>
+        <p class="card-text"><small class="text-muted">Free</small></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+@code {
+	[Parameter] public int Count { get; set; }
+
+}

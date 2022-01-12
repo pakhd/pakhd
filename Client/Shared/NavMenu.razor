@@ -1,0 +1,58 @@
+﻿<div class="top-row ps-3 navbar navbar-dark my-1">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">
+            <img src="/assets/pakhd-36.svg" width="18" height="18" class="me-1"/>
+            Pakhd
+        </a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="lotteries">
+                @*<span class="oi oi-list-rich" aria-hidden="true"></span>*@
+                <i class="bi bi-123 me-2" style="font-size: 1.5rem;"></i>
+                Lotteries
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="tickets">
+                <i class="bi bi-ticket-perforated me-2" style="font-size: 1.4rem;"></i>
+                Tickets
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="referral">
+                <i class="bi bi-person-plus me-2" style="font-size: 1.4rem;"></i>
+                Referral Code
+            </NavLink>
+        </div>
+        <div class="nav-item absolute-bottom px-3">
+            <NavLink class="nav-link" href="support">
+                @*<span class="oi oi-list-rich" aria-hidden="true"></span>*@
+                <i class="bi bi-telephone me-2" style="font-size: 1.4rem;"></i>
+                Support
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

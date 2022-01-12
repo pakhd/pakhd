@@ -1,0 +1,55 @@
+﻿@page "/lotteries/{Id:int}/items"
+@inject ItemService _item
+@attribute [Authorize]
+
+@*<ItemForm Item="@Item" HandleValidSubmit="@EditItem" ButtonText="Save"/>*@
+
+
+
+
+
+<Table Items="Items" Caption="items">
+    <TableHeader>
+        <th>No</th>
+        <th>Status</th>
+
+        <th></th>
+    </TableHeader>
+    <RowTemplate>
+        <td>@context.Number</td>
+        <td>@context.Status</td>
+
+        <td>
+            <button class="btn btn-sm btn-outline-primary" 
+                    type="button" 
+                    data-bs-toggle="offcanvas" 
+                    data-bs-target="#offcanvasRight" 
+                    aria-controls="offcanvasRight" 
+                    @onclick="@(() => SelectItem(context))">
+                Edit
+            </button>
+        </td>
+    </RowTemplate>
+</Table>
+
+
+@code {
+    [Parameter] public int Id { get; set; }
+    public Item[] Items { get; set; }
+    public Item Item { get; set; }
+    public int Count { get; set; }
+
+    public bool IsCreating { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Items = await _item.GetByLotteryAsync(Id);
+    }
+
+    private void SelectItem(Item item)
+    {
+        Item = item;
+    }
+
+
+}

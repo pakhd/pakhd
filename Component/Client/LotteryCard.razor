@@ -1,0 +1,30 @@
+﻿
+
+
+<div class="col-md-6">
+  <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+    <div class="col p-4 d-flex flex-column position-static">
+      <strong class="d-inline-block mb-2 text-@Lottery.Currency.Color">@Lottery.Currency.CurrencyCode</strong>
+      <h3 class="mb-0">@Lottery.Name</h3>
+      <div class="mb-1 text-muted">@Lottery.CreatedOn</div>
+      <p class="card-text mb-auto">@Lottery.Description</p>
+
+      <div class="card-text mb-auto">
+          <span class="badge bg-@BadgeStyle">@Status</span>
+      </div>
+
+      <a href='@($"lotteries/{Lottery.LotteryId}")' class="btn btn-sm btn-outline-primary stretched-link">Check Out</a>
+    </div>
+    <div class="col-auto p-2 d-none d-lg-block">
+      <img width="200" height="250" src="@Lottery.Currency.LogoUrl" />
+    </div>
+  </div>
+</div>
+
+
+
+@code {
+    [Parameter] public Lottery Lottery { get; set; }
+    public string Status => Lottery.IsClosed == true ? "closed" : "active";
+    public string BadgeStyle => Lottery.IsClosed == true ? "danger" : "primary";
+}

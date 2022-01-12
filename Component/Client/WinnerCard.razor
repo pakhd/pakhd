@@ -1,0 +1,16 @@
+﻿
+
+<div class="row p-3 my-1 rounded border shadow shadow-sm">
+	<div class="col-2">@Winner.Place</div>
+	<div class="col-10">@Winner.PakhdUser.UserName</div>
+</div>
+
+
+
+
+
+
+
+@code {
+	[Parameter] public Winner Winner { get; set; }
+}

@@ -1,0 +1,46 @@
+﻿@page "/currencies"
+@inject CurrencyService _currency
+@attribute [Authorize]
+
+
+
+
+<CurrencyForm Currency="Currency" HandleValidSubmit="CreateCurrency"/>
+
+<Table Items="Currencies">
+    <TableHeader>
+        <th>Code</th>
+        <th>Name</th>
+        <th>Color</th>
+        <th>Logo URL</th>
+        <th></th>
+    </TableHeader>
+    <RowTemplate>
+        <td>@context.CurrencyCode</td>
+        <td>@context.Name</td>
+        <td>@context.Color</td>
+        <td>@context.LogoUrl</td>
+    </RowTemplate>
+</Table>
+
+
+
+@code {
+    public Currency[]? Currencies { get; set; }
+    public Currency Currency = new Currency();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Currencies = await _currency.GetAsync();
+        Console.WriteLine(Currencies.Length);
+    }
+
+
+    private async void CreateCurrency()
+    {
+        Currencies = await _currency.CreateCurrencyAsync(Currency);
+        Currency = new Currency();
+        StateHasChanged();
+    }
+}

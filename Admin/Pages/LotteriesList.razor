@@ -1,0 +1,78 @@
+﻿@page "/lotteries"
+@inject LotteryService _lottery
+@inject CurrencyService _currency
+@attribute [Authorize]
+
+@if(Currencies is not null && Currencies.Length > 0)
+{
+    
+    <LotteryForm Lottery="@Lottery" Currencies="@Currencies" HandleValidSubmit="@AddLottery"/>
+}
+
+
+
+
+
+<Table Items="Lotteries" Caption="lotteries">
+    <TableHeader>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Items</th>
+        <th>Reservations</th>
+        <th>Sold</th>
+        <th></th>
+    </TableHeader>
+    <RowTemplate>
+        <td>@context.LotteryId</td>
+        <td>@context.Name</td>
+        <td>@context.Items.Count()</td>
+        <td>@context.Items.Where(i => i.Status == ItemStatus.Reserved).Count()</td>
+        <td>@context.Items.Where(i => i.Status == ItemStatus.Sold).Count()</td>
+        <td>
+            <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                  Action
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href='@($"lotteries/{context.LotteryId}")'>Preview</a></li>
+                  <li><a class="dropdown-item" href='@($"lotteries/{context.LotteryId}/items")'>Items</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href='@($"lotteries/{context.LotteryId}/reservations")'>Reservations</a></li>
+                </ul>
+            </div>
+        </td>
+    </RowTemplate>
+    <TableFooter>
+        <td></td>
+        <td></td>
+        <td>@Lotteries.Sum(p => p.Items.Count())</td>
+        <td>@Lotteries.Sum(p => p.Items.Where(i => i.Status == ItemStatus.Reserved).Count())</td>
+        <td>@Lotteries.Sum(p => p.Items.Where(i => i.Status == ItemStatus.Sold).Count())</td>
+    </TableFooter>
+</Table>
+
+
+@code {
+    public Lottery[] Lotteries { get; set; }
+    public Currency[] Currencies { get; set; }
+    public Currency Currency { get; set; }
+    public Lottery Lottery = new Lottery();
+    public int Count { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Lotteries = await _lottery.GetAsync();
+        Currencies = await _currency.GetAsync();
+    }
+
+    public async void AddLottery() {
+        Lotteries = await _lottery.CreateAsync(Lottery, Count);
+        Lottery = new Lottery();
+        StateHasChanged();
+    }
+
+    public void SelectCurrency(Currency currency)
+    {
+        Currency = currency;
+    }
+}

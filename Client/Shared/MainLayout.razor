@@ -1,0 +1,19 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>Pakhd</PageTitle>
+
+<div class="page">
+    <div class="sidebar bg-dark">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row bg-dark text-light rounded px-2 auth mb-3">
+            <LoginDisplay />
+        </div>
+
+        <article class="container px-4">
+            @Body
+        </article>
+    </main>
+</div>

@@ -1,0 +1,50 @@
+﻿@page "/tickets"
+@inject ReservationService _reservation
+@inject NavigationManager NavigationManager
+
+
+<PageTitle>Tickets</PageTitle>
+
+
+<h3 class="my-4">Tickets</h3>
+
+@if(Reservations is null)
+{
+	<p>Loading ....</p>
+}
+else
+{
+	@foreach(var id in LotteryIds)
+	{
+		var reservations = Reservations.Where(r => r.Item.LotteryId == id).ToArray();
+	
+		<UserReservationCard LotteryId="@id" Reservations="@reservations"/>
+	}
+	
+}
+
+
+@code {
+	[CascadingParameter]
+	private Task<AuthenticationState> authenticationStateTask { get; set; }
+	public Reservation[] Reservations { get; set; }
+	public int[] LotteryIds { get; set; }
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await authenticationStateTask;
+		var user = authState.User;
+
+		if (user.Identity.IsAuthenticated)
+		{
+			Reservations = await _reservation.GetByUserAsync(user.Identity.Name);
+			LotteryIds = Reservations.Select(r => r.Item.LotteryId).Distinct().ToArray();
+		}
+		else
+		{
+			NavigationManager.NavigateTo($"Identity/Account/Login?returnUrl=~/tickets", true);
+		}
+		
+	}
+}

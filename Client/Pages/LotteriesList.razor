@@ -1,0 +1,40 @@
+﻿@page "/lotteries"
+@inject LotteryService _lottery
+
+
+<PageTitle>Lotteries</PageTitle>
+
+<div class="p-4 p-md-5 mb-4 text-white rounded bg-dark">
+    <div class="col-md-6 px-0">
+      <h1 class="display-4">Welcome to Pakhd</h1>
+      <p class="lead my-3">Try your luck and win huge prizes 🎉</p>
+    </div>
+  </div>
+
+<div class="row mb-2">
+    @if(Lotteries is null)
+    {
+        <p>Loading...</p>
+    }
+    else if(Lotteries.Length == 0)
+    {
+        <p>No Data</p>
+    }
+    else
+    {
+        foreach(var lottery in Lotteries)
+        {
+            <LotteryCard Lottery="@lottery" />
+
+        }
+    }
+</div>
+
+@code {
+    public Lottery[] Lotteries { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Lotteries = await _lottery.GetAsync();
+    }
+}

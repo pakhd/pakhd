@@ -1,0 +1,60 @@
+﻿@using Pakhd.Component.Shared
+
+
+@*<button class="btn btn-primary my-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSalesLine" aria-controls="offcanvasSalesLine">Create Currency</button>*@
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasSalesLines" aria-labelledby="offcanvasSalesLinesLabel">
+  
+    <div class="offcanvas-header">
+    <h5 id="offcanvasSalesLinesLabel">@SalesOrderNo</h5>
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <Table Items="SalesLines">
+        <TableHeader>
+            <th>Lottery Id</th>
+            <th>Line No</th>
+            <th>Item No</th>
+            <th>Price</th>
+        </TableHeader>
+        <RowTemplate>
+            <td>@context.Item.Lottery.LotteryId</td>
+            <td>@context.LineNo</td>
+            <td>@context.Item.Number</td>
+            <td>@context.Price</td>
+        </RowTemplate>
+        <TableFooter>
+            <td></td>
+            <td></td>
+            <td>@SalesLines.Count()</td>
+            <td>@SalesLines.Sum(s => s.Price)</td>
+        </TableFooter>
+                
+    </Table>
+    <div class="d-flex justify-content-between">
+        <div class="col text-start">
+            <button class="btn btn-sm btn-outline-warning">Edit</button>
+        </div>
+        <div class="col text-end">
+            @if(!IsPosted)
+            {
+                <button class="btn btn-sm btn-outline-success" data-bs-dismiss="offcanvas" @onclick="OnPostClick">Post</button>
+            }
+        </div>
+    </div>
+  </div>
+
+ 
+</div>
+
+
+
+
+
+@code {
+    [Parameter] public SalesLine[] SalesLines { get; set; }
+    [Parameter] public string SalesOrderNo { get; set; }
+    [Parameter] public bool IsPosted { get; set; }
+
+    [Parameter] public EventCallback OnPostClick { get; set; }
+}

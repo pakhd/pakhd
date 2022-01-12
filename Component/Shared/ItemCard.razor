@@ -1,0 +1,49 @@
+﻿
+
+@if(IsAdmin)
+{
+    <div class="col text-center m-2 btn @ButtonStyle">
+        <div class="card-body">
+            @Item.Number
+        </div>
+    </div>
+}
+else
+{
+    <div class="col text-center m-2 btn @ButtonStyle" 
+            data-bs-toggle="modal" 
+            data-bs-target="#reserveItemModal" 
+            @onclick="OnClickCallback">
+
+        <div class="card-body">
+            @Item.Number
+        </div>
+    </div>
+
+}
+
+
+@code {
+    [Parameter] public Item Item { get; set;}
+    [Parameter] public EventCallback OnClickCallback { get; set; }
+    [Parameter] public bool IsAdmin { get; set; }
+    [Parameter] public bool IsReservedByUser { get; set; }
+    //public string IsDisabled => Item.Status != ItemStatus.Free ? "disalbed" : "";
+    public string ButtonStyle => GetButtonStyle();
+
+    public string GetButtonStyle()
+    {
+        if(Item.Status == ItemStatus.Free)
+        {
+            return "btn-outline-dark";
+        }
+        else if(Item.Status == ItemStatus.Reserved)
+        {
+            return "btn-warning";
+        }
+        else
+        {
+            return "btn-danger";
+        }
+    }
+}

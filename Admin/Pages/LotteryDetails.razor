@@ -1,0 +1,37 @@
+﻿@page "/lotteries/{Id:int}"
+@inject LotteryService _lottery
+@inject ItemService _item
+@attribute [Authorize]
+
+@if(Lottery is not null) {
+	<LotteryHeader Lottery="@Lottery"/>
+}
+
+
+@if(Items is not null)
+{
+	<div class="row row-cols-10 row-cols-md-10 g-4 mt-5">
+		@foreach(var item in Items)
+		{
+			<ItemCard Item="@item" IsAdmin="@true"/>
+		}
+	</div>
+	
+}
+
+
+
+
+@code {
+	[Parameter] public int Id { get; set; }
+	public Lottery Lottery { get; set; }
+	public Item[] Items { get; set; }
+
+
+	protected override async Task OnParametersSetAsync()
+	{
+		Lottery = await _lottery.GetByIdAsync(Id);
+		Items = await _item.GetByLotteryAsync(Id);
+
+	}
+}

@@ -1,0 +1,180 @@
+﻿@page "/lotteries/{Id:int}"
+@inject LotteryService _lottery
+@inject ItemService _item
+@inject ReservationService _reservation
+@inject WinnerService _winner
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager NavigationManager
+@implements IAsyncDisposable
+
+
+<PageTitle>Lottery #@Id</PageTitle>
+
+
+@if(Lottery is not null && Lottery.IsClosed) {
+
+	<h1 class="text-center mt-5 mb-3">Winners 🎆</h1>
+	if(Winners is not null)
+	{
+		<div class="row">
+			<div class="d-flex flex-column justify-content-center">
+				@foreach(var winner in Winners)
+				{
+					<WinnerCard Winner="@winner"/>
+
+				}
+			</div>
+		</div>
+		
+		
+
+	}
+}
+else
+{
+	@if(Lottery is not null) {
+		<LotteryHeader Lottery="@Lottery"/>
+	}
+	
+	@if(!String.IsNullOrEmpty(AlertMessage))
+	{
+		<Alert Message="@AlertMessage" Style="@AlertStyle"/>
+	}
+	
+	<div class="d-flex justify-context-start">
+		<div class="me-1">
+			<button class="btn btn-sm btn-outline-dark">Available</button>
+		</div>
+		<div class="mx-1">
+			<button class="btn btn-sm btn-warning">Reserved</button>
+		</div>
+		<div class="mx-1">
+			<button class="btn btn-sm btn-danger">Sold</button>
+		</div>
+	</div>
+	
+	@if(Items is not null)
+	{
+		<div class="row row-cols-10 row-cols-md-10 g-4 mt-2">
+			@foreach(var item in Items)
+			{
+				<ItemCard Item="@item" OnClickCallback="@(() => SelectItem(item))"/>
+			}
+		</div>
+	}
+	
+	<ReserveItem Item="@Item" HandleValidSubmit="@(() => ReserveItemAsync(Item.ItemId))" IsReservedByUser="@IsReservedByUser" UserExceededMaxReservation="@UserExceededMaxReservation"/>
+}
+
+
+
+
+@code {
+	[CascadingParameter]
+	private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+	[Parameter] public int Id { get; set; }
+	public Lottery? Lottery { get; set; }
+	public Winner[] Winners { get; set; }
+	public Item[]? Items { get; set; }
+	public Item? Item { get; set; }
+	private HubConnection? hubConnection;
+
+	public bool IsReserved { get; set; }
+	public bool IsReservedByUser { get; set; }
+	public bool UserExceededMaxReservation { get; set; }
+	public string AlertMessage { get; set; }
+	public string AlertStyle { get; set; }
+
+	protected override async Task OnParametersSetAsync()
+	{
+		Lottery = await _lottery.GetByIdAsync(Id);
+		Items = await _item.GetByLotteryAsync(Id);
+
+		if(Lottery.IsClosed)
+		{
+			Winners = await _winner.GetByLotteryAsync(Id);
+		}
+
+		hubConnection = new HubConnectionBuilder()
+			.WithUrl(NavigationManager.ToAbsoluteUri("/itemhub"))
+			.Build();
+
+		hubConnection.On<int, ItemStatus>("ReceiveItem", (itemId, status) =>
+		{
+			Items.FirstOrDefault(i => i.ItemId == itemId).Status = status;
+			StateHasChanged();
+		});
+
+		try
+		{
+			await hubConnection.StartAsync();
+		}
+		catch(Exception ex)
+		{
+			Console.WriteLine(ex.Message);
+		}
+	}
+
+
+
+	private async void SelectItem(Item item)
+	{
+		var authState = await authenticationStateTask;
+		var user = authState.User;
+
+		if(user.Identity.IsAuthenticated)
+		{
+			IsReservedByUser = await _reservation.ItemIsReservedByUser(item.ItemId, user.Identity.Name);
+			UserExceededMaxReservation = await _reservation.UserExceededMaxReservation(user.Identity.Name);
+		}
+		
+
+		Item = item;
+		
+		StateHasChanged();
+	}
+
+	private async void ReserveItemAsync(int Id)
+	{
+		var authState = await authenticationStateTask;
+		var user = authState.User;
+
+		var isSold = await _item.IsSoldAsync(Item.ItemId);
+		if(isSold)
+		{
+			AlertMessage = "This ticket is already Sold 🤷🏻‍♂";
+			AlertStyle = "warning";
+			Items = await _item.GetByLotteryAsync(Id);
+			await OnParametersSetAsync();
+		}
+		else
+		{
+			if (user.Identity.IsAuthenticated) {
+				Items = await _reservation.ReserveAsync(Id, user.Identity.Name);
+			}
+			StateHasChanged();
+		}
+		Send();
+	}
+
+
+	private async Task Send()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("SendItem", Item.ItemId, Item.Status);
+        }
+    }
+
+	public bool IsConnected =>
+        hubConnection?.State == HubConnectionState.Connected;
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+}

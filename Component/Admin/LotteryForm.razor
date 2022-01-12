@@ -1,0 +1,72 @@
+﻿
+@inject LotteryService _lottery
+
+<button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">Create Lottery</button>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+  <div class="offcanvas-header">
+    <h5 id="offcanvasRightLabel">Offcanvas right</h5>
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+
+    @if(Lottery.CurrencyId is null)
+    {
+        <div class="list-group">
+            @foreach (var currency in Currencies)
+            {
+                <CurrencyCard Currency="@currency" OnClickCallback="@(() => ChooseCurrency(currency.CurrencyId))"/>
+            }
+        </div>
+    }
+    else
+    {
+        <EditForm Model="@Lottery" OnValidSubmit="@HandleValidSubmit" class="mt-3">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+        
+            <div class="form-floating mb-3">
+              <input type="text" class="form-control" id="floatingInput" @bind="@Lottery.Name">
+              <label for="floatingInput">Name</label>
+            </div>
+        
+            <div class="form-floating mb-3">
+              <input type="text" class="form-control" id="floatingDescription" @bind="@Lottery.Description">
+              <label for="floatingDescription">Description</label>
+            </div>
+
+            <div class="form-floating mb-3">
+              <input type="number" class="form-control" id="floatingTicketPrice" @bind="@Lottery.TicketPrice">
+              <label for="floatingTicketPrice">TicketPrice</label>
+            </div>
+
+            <div class="form-floating mb-3">
+              <input type="number" class="form-control" id="floatingPrize" @bind="@Lottery.Prize">
+              <label for="floatingPrize">Prize</label>
+            </div>
+        
+            <div class="form-floating mb-3">
+              <input type="text" class="form-control" id="floatingCount" @bind="@_lottery.Count">
+              <label for="floatingCount">Count of Items</label>
+            </div>
+        
+            <div class="text-end mt-3">
+                <button class="btn btn-primary" type="submit" data-bs-dismiss="offcanvas">Create</button>
+            </div>
+            
+        </EditForm>
+    }
+        
+  </div>
+</div>
+
+
+
+@code {
+    [Parameter] public Lottery Lottery { get; set; }
+    [Parameter] public Currency[] Currencies { get; set; }
+    [Parameter] public EventCallback HandleValidSubmit { get; set; }
+    [Parameter] public EventCallback OnCurrencyClickCallback { get; set; }
+
+    public void ChooseCurrency(int currencyId) => Lottery.CurrencyId = currencyId;
+}

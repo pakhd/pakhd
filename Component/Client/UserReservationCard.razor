@@ -1,0 +1,30 @@
+﻿
+
+<div class="d-flex p-3 border border-1 rounded shadow-sm justify-content-between">
+	<div class="col">
+		<span class="badge rounded-pill bg-dark p-3 m-1">@LotteryId</span>
+	</div>
+	<div class="col d-flex justify-content-center">
+		@foreach(var reservation in Reservations)
+		{
+			if(reservation.Status == ReservationStatus.Active)
+			{
+				<span class="badge rounded-pill bg-primary p-3 m-1">@reservation.Item.Number</span>
+			}
+			else if(reservation.Status == ReservationStatus.Sold)
+			{
+				<span class="badge rounded-pill bg-success p-3 m-1">@reservation.Item.Number</span>
+			}
+			else
+			{
+				<span class="badge rounded-pill bg-danger p-3 m-1">@reservation.Item.Number</span>
+			}
+		}
+	</div>
+</div>
+
+
+@code {
+	[Parameter] public Reservation[] Reservations { get; set; }
+	[Parameter] public int LotteryId { get; set; }
+}

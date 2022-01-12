@@ -1,0 +1,141 @@
+﻿@page "/lotteries/{Id:int}/reservations"
+@inject ReservationService _reservation
+@inject ItemService _item
+@inject UserService _user
+@attribute [Authorize]
+
+
+@if(Items is not null && PakhdUsers is not null && Items.Length > 0 && PakhdUsers.Length > 0)
+{
+    <ReservationForm Reservation="@Reservation" Items="@Items" PakhdUsers="@PakhdUsers" HandleValidSubmit="@(() => ReserveItem(Reservation))"/> @*HandleValidSubmit="@EditItem" *@
+}
+
+
+
+@if(IsLoading)
+{
+    <Loading Size="5rem"/>
+}
+else
+{
+    <Table Items="ReservationsFiltered" Caption="reservations">
+        <TableHeader>
+            <th>
+                Created On
+                <input type="test" class="form-control" placeholder="Search ..." @bind="@SearchDateValue" @bind:event="oninput"/>
+            </th>
+            <th>
+                Username
+                <input type="text" class="form-control" placeholder="Search ..." @bind="@SearchUsernameValue" @bind:event="oninput"/>
+            </th>
+            <th>
+                Ticket No
+                <input type="text" class="form-control" placeholder="Search ..." @bind="@SearchItemNoValue" @bind:event="oninput"/>
+            </th>
+            <th></th>
+        </TableHeader>
+        <RowTemplate>
+            <td>@context.CreatedOn.ToLocalTime()</td>
+            <td>@context.PakhdUser.UserName</td>
+            <td>@context.Item.Number</td>
+            <td>
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    Action
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" data-bs-toggle="offcanvas" 
+                                data-bs-target="#offcanvasRight" 
+                                aria-controls="offcanvasRight" 
+                                @onclick="@(() => SelectReservation(context))">Edit</a></li>
+                    <li><a class="dropdown-item" @onclick="@(() => SellReservation(context))">Sell</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" @onclick="@(() => RemoveReservation(context))">Remove</a></li>
+                  </ul>
+                </div>
+            </td>
+        </RowTemplate>
+        <TableFooter>
+            <td></td>
+            <td></td>
+            <td>@Reservations.Count()</td>
+        </TableFooter>
+    </Table>
+}
+
+
+
+@code {
+    [Parameter] public int Id { get; set; }
+    public Reservation[] Reservations { get; set; }
+    public Reservation[] ReservationsFiltered => FilterReservationsByItem();
+    public Item[] Items { get; set; }
+    public PakhdUser[] PakhdUsers { get; set; }
+    public Reservation Reservation = new Reservation();
+    public string SearchDateValue { get; set; }
+    public string SearchItemNoValue { get; set; }
+    public string SearchUsernameValue { get; set; }
+
+    public bool IsLoading { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Reservations = await _reservation.GetByLotteryAsync(Id);
+
+        Items = await _item.GetNotSoldItemsByLottery(Id);
+
+        PakhdUsers = await _user.GetAsync();
+
+    }
+
+    private void SelectReservation(Reservation reservation)
+    {
+        Reservation = reservation;
+    }
+
+    private async void ReserveItem(Reservation reservation)
+    {
+        int itemId = reservation.ItemId;
+        var user = await _user.FindByIdAsync(reservation.PakhdUserId);
+
+        Items = await _reservation.ReserveAsync(itemId, user.UserName);
+        Reservations = await _reservation.GetByLotteryAsync(Id);
+        StateHasChanged();
+
+    }
+
+    private async void RemoveReservation(Reservation reservation)
+    {
+        await _reservation.DeleteAsync(reservation);
+        StateHasChanged();
+    }
+
+    private Reservation[] FilterReservationsByItem()
+    {
+        if(!String.IsNullOrEmpty(SearchDateValue))
+        {
+            return Reservations.Where(r => r.CreatedOn.ToLocalTime().ToString().Contains(SearchDateValue)).ToArray();
+        }
+        else if(!String.IsNullOrEmpty(SearchItemNoValue))
+        {
+            return Reservations.Where(r => r.Item.Number.ToString() == SearchItemNoValue.ToString()).ToArray();
+        }
+        else if(!String.IsNullOrEmpty(SearchUsernameValue))
+        {
+            return Reservations.Where(r => r.PakhdUser.UserName.Contains(SearchUsernameValue)).ToArray();
+        }
+        else
+        {
+            return Reservations;
+        }
+    }
+
+    private async void SellReservation(Reservation reservation)
+    {
+        IsLoading = true;
+        Reservations = await _reservation.SellAsync(reservation);
+        IsLoading = false;
+        StateHasChanged();
+    }
+
+}

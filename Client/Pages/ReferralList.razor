@@ -1,0 +1,78 @@
+﻿@page "/referral"
+@inject ReferralService _referral
+@inject UserService _user
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+
+
+@if(Referrals is null && PakhdUser is null)
+{
+	<h3>Referrals</h3>
+	<hr />
+	<Loading />
+}
+else
+{
+	<div class="d-flex justify-content-between mt-3 border rounded shadow shadow-sm pt-2 p-2 px-3">
+		<h3 class="mt-2">@PakhdUser.ReferralCode</h3>
+		<h3 class="mt-2" @onclick="CopyTextToClipboard"><i class="bi bi-files"></i></h3>
+	</div>
+	<h3 class="mt-5">Referrals</h3>
+	<hr />
+	<ReferralCard ReferralCount="@Referrals.Count()"/>
+
+	<h3 class="mt-5">Tickets</h3>
+	<hr />
+
+	<FreeTicketCard Count="@Count"/>
+}
+
+
+@if(Count >= 1)
+{
+	<div class="flex-column text-center">
+		<a class="btn btn-success my-5" href="https://wa.me/9613735215?text=I want to redeem my free ticket!">Redeeem</a>
+	</div>
+}
+
+
+
+
+
+
+
+@code {
+	[CascadingParameter] private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+	public Referral[] Referrals { get; set; }
+	public SalesLine[] SalesLines { get; set; }
+	public PakhdUser PakhdUser { get; set; }
+	public int Count { get; set;}
+
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await authenticationStateTask;
+		var user = authState.User;
+
+		if (user.Identity.IsAuthenticated)
+		{
+			PakhdUser = await _user.FindByUsernameAsync(user.Identity.Name);
+			Referrals = await _referral.GetByUserAsync(user.Identity.Name);
+
+			var referredUsers = Referrals.Select(r => r.ReferredToId).ToArray();
+
+			Count = await _referral.GetSalesCount(referredUsers) / 5;
+		}
+		else
+		{
+			NavigationManager.NavigateTo($"Identity/Account/Login?returnUrl=~/referral", true);
+		}
+		
+	}
+
+	private async Task CopyTextToClipboard()
+    {
+        await JSRuntime.InvokeVoidAsync("clipboardCopy.copyText", $"{NavigationManager.BaseUri}identity/account/register?refCode={PakhdUser.ReferralCode}");
+    }
+}
